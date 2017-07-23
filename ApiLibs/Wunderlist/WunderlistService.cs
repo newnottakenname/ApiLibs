@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RestSharp;
@@ -45,7 +46,7 @@ namespace ApiLibs.Wunderlist
 
             AddStandardHeader(new Param("X-Access-Token", wunderlistToken));
             AddStandardHeader(new Param("X-Client-ID", wunderlistId));
-            Client = new RestClient();
+            Client = new HttpClient();
             SetBaseUrl("https://a.wunderlist.com/api/v1/");
 
             return wunderlistToken;

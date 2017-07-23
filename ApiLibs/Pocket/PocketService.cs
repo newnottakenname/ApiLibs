@@ -51,9 +51,7 @@ namespace ApiLibs.Pocket
                 new Param("redirect_uri", "zeus://")
             };
 
-            IRestResponse resp = await HandleRequest("oauth/request.php", Call.POST, parameters: parameters);
-            
-            string code = resp.Content.Replace("code=", "");
+            string code = (await HandleRequest("oauth/request.php", Call.POST, parameters: parameters)).Replace("code=", "");
 
             authenticator.ActivateOAuth(new Uri("https://getpocket.com/auth/authorize?request_token=" + code + "&redirect_uri=" + GeneralRedirectUrl));
 
@@ -63,10 +61,10 @@ namespace ApiLibs.Pocket
                 new Param("code", code)
             };
 
-            resp = await HandleRequest("oauth/authorize.php", Call.POST, parameters: parameters);
+            string resp = await HandleRequest("oauth/authorize.php", Call.POST, parameters: parameters);
 
-            var noAccessToken = resp.Content.Replace("access_token=", "");
-            string accessToken = noAccessToken.Remove(30, resp.Content.Length - 13 - 30);
+            var noAccessToken = resp.Replace("access_token=", "");
+            string accessToken = noAccessToken.Remove(30, resp.Length - 13 - 30);
 
             return accessToken;
         }
@@ -95,9 +93,9 @@ namespace ApiLibs.Pocket
             parameters.Add(new Param("detailType", detail.ToString().ToLower()));
 
 
-            IRestResponse resp = await HandleRequest("get.php", Call.POST, parameters);
+            string resp = await HandleRequest("get.php", Call.POST, parameters);
 
-            var regexd = Regex.Replace(Regex.Replace(resp.Content, @"""\d+"":", "").Replace("\"list\":{", "\"list\":[").Replace("}},\"error\"", "}],\"error\""), "{{(([^{}]|{[^{}]+}|)+)}(([^{}]|{[^{}]+}|)+)}", "[{$1}$3]");
+            var regexd = Regex.Replace(Regex.Replace(resp, @"""\d+"":", "").Replace("\"list\":{", "\"list\":[").Replace("}},\"error\"", "}],\"error\""), "{{(([^{}]|{[^{}]+}|)+)}(([^{}]|{[^{}]+}|)+)}", "[{$1}$3]");
             return JsonConvert.DeserializeObject<ReadingList>(regexd);
         }
 

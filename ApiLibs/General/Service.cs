@@ -4,21 +4,20 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using ApiLibs.General;
+using System.Net.Http;
 using Newtonsoft.Json;
-using RestSharp;
-using RestSharp.Authenticators;
 
 namespace ApiLibs
 {
     public abstract class Service
     {
-        internal RestClient Client;
+        internal HttpClient Client;
         private readonly List<Param> _standardParameter = new List<Param>();
         private readonly List<Param> _standardHeader = new List<Param>();
 
         public Service(string hostUrl)
         {
-            Client = new RestClient { BaseUrl = new Uri(hostUrl) };
+            Client = new HttpClient { BaseAddress = new Uri(hostUrl) };
         }
 
         internal void AddStandardParameter(Param p)
@@ -73,68 +72,34 @@ namespace ApiLibs
             }
         }
 
-        internal void ConnectOAuth(string username, string secret)
-        {
-            Client.Authenticator = new HttpBasicAuthenticator(username, secret);
-        }
         
 
-        internal async Task<T> MakeRequest<T>(string url, Call m = Call.GET, List<Param> parameters = null, List<Param> header = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        internal async Task<T> MakeRequest<T>(string url, Call call = Call.GET, List<Param> parameters = null, List<Param> header = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            IRestResponse response = await HandleRequest(url, m , parameters, header, content, statusCode);
-
-            return Convert<T>(response);
+            return Convert<T>(await HandleRequest(url, call, parameters, header, content, statusCode));
         }
 
-        internal virtual async Task<IRestResponse> HandleRequest(string url, Call call = Call.GET, List<Param> parameters = null, List<Param> headers = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        internal virtual async Task<string> HandleRequest(string url, Call call = Call.GET, List<Param> parameters = null, List < Param> headers = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            RestRequest request = new RestRequest(url, Convert(call));
-            return await HandleRequest(request, parameters, headers, content, statusCode);
-        }
+            headers = headers ?? new List<Param>();
+            parameters = parameters ?? new List<Param>();
 
-        internal async Task<IRestResponse> HandleRequest(IRestRequest request, List<Param> parameters = null, List<Param> headers = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
-        {
-            if (headers != null)
+            
+
+            parameters.AddRange(_standardParameter);
+            var encoded =
+                new FormUrlEncodedContent(
+                    parameters.FindAll(i => !(i is OParam) || i.Value != null).ConvertAll(i => new KeyValuePair<string, string>(i.Name, i.Value)));
+
+            HttpRequestMessage request = null;
+
+            if (call == Call.POST)
             {
-                foreach (Param p in headers)
-                {
-                    request.AddHeader(p.Name, p.Value);
-                }
+                request = new HttpRequestMessage(Convert(call), url) {Content = encoded};
             }
-
-            foreach (Param para in _standardHeader)
+            else
             {
-                request.AddHeader(para.Name, para.Value);
-            }
-
-            if (parameters != null)
-            {
-                foreach (Param para in parameters)
-                {
-                    if (para is OParam)
-                    {
-                        if (para.Value == null)
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (request.Method == Method.GET || request.Method == Method.POST)
-                    {
-
-                        request.AddParameter(para.Name, para.Value);
-                    }
-                    else
-                    {
-                        request.AddParameter(para.Name, para.Value, ParameterType.QueryString);
-                    }
-                }
-                
-            }
-
-            foreach (Param para in _standardParameter)
-            {
-                request.AddParameter(para.Name, para.Value, ParameterType.QueryString);
+                request = new HttpRequestMessage(Convert(call), url + "?" + encoded.ReadAsStringAsync().Result);
             }
 
             if (content != null)
@@ -143,24 +108,28 @@ namespace ApiLibs
                 {
                     NullValueHandling = NullValueHandling.Ignore
                 };
-                //JsonConvert.SerializeObject(content, settings)
-                //                request.AddJsonBody(content);
-                request.AddParameter("application/json", JsonConvert.SerializeObject(content, settings), ParameterType.RequestBody);
-                request.AddHeader("Content-Type", "application/json");
+                request.Content = new StringContent(JsonConvert.SerializeObject(content, settings));
+                //parameters.Add(new Param("application/json", JsonConvert.SerializeObject(content, settings)));
+                //headers.Add(new Param("Content-Type", "application/json"));
             }
+
+            //Add all headers
+            headers.ForEach(p => request.Headers.Add(p.Name, p.Value));
+            _standardHeader.ForEach(p => request.Headers.Add(p.Name, p.Value));
 
             return await ExcecuteRequest(request, statusCode);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("SonarLint", "S2228:Console logging should not be used", Justification = "I can")]
-        internal async Task<IRestResponse> ExcecuteRequest(IRestRequest request, HttpStatusCode statusCode = HttpStatusCode.OK)
+        internal async Task<string> ExcecuteRequest(HttpRequestMessage request, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             Debug.Assert(Client != null, "Client != null");
-            IRestResponse resp = await Client.ExecuteTaskAsync(request);
-
-            if (resp.StatusCode != statusCode && resp.StatusCode.ToString() != "Created" && resp.StatusCode.ToString() != "ResetContent")
+            HttpResponseMessage resp = await Client.SendAsync(request);
+            string responseContent = await resp.Content.ReadAsStringAsync();
+            if (resp.StatusCode != statusCode)
             {
-                if (resp.ErrorException != null)
+                //No internet
+                /*if (resp.E != null)
                 {
                     if (resp.ErrorException is System.Net.WebException)
                     {
@@ -169,38 +138,38 @@ namespace ApiLibs
                     }
 
                     throw resp.ErrorException;
-                }
+                }*/
                 RequestException toThrow;
                 switch (resp.StatusCode)
                 {
                         case HttpStatusCode.NotFound:
-                            toThrow = new PageNotFoundException(resp, resp.ResponseUri.Host, resp.StatusCode, resp.Content);
+                            toThrow = new PageNotFoundException(resp, null, resp.StatusCode, responseContent);
                             break;
                         case HttpStatusCode.Unauthorized:
-                            toThrow = new UnAuthorizedException(resp, resp.ResponseUri.Host, resp.StatusCode, resp.Content);
+                            toThrow = new UnAuthorizedException(resp, null, resp.StatusCode, responseContent);
                             break;
                         case HttpStatusCode.BadRequest:
-                            toThrow = new BadRequestException(resp, resp.ResponseUri.Host, resp.StatusCode, resp.Content);
+                            toThrow = new BadRequestException(resp, null, resp.StatusCode, responseContent);
                             break;
                         default:
-                            toThrow = new RequestException(resp, resp.ResponseUri.Host, resp.StatusCode, resp.Content);
+                            toThrow = new RequestException(resp, null, resp.StatusCode, responseContent);
                         break;
 
                 }
                 Console.WriteLine("--Exception Log---");
-                Console.WriteLine("URL:\n" +  resp.ResponseUri);
+                Console.WriteLine("URL:\n" +  resp.RequestMessage.RequestUri);
                 Console.WriteLine("Status Code:\n" + toThrow.StatusCode);
                 Console.WriteLine("Response Message:\n" + resp.Content);
                 Console.WriteLine("Full StackTrace:\n" + toThrow.StackTrace);
                 Console.WriteLine("---END---\n");
                 throw toThrow;
             }
-            return resp;
+            return responseContent;
         }
 
-        internal T Convert<T>(IRestResponse resp)
+        internal T Convert<T>(HttpResponseMessage resp)
         {
-            return Convert<T>(resp.Content);
+            return Convert<T>(resp.Content.ReadAsStringAsync().Result);
         }
 
         internal T Convert<T>(string text)
@@ -214,29 +183,30 @@ namespace ApiLibs
             return returnObj;
         }
 
-        private Method Convert(Call m)
+        private HttpMethod Convert(Call m)
         {
             switch (m)
             {
                 case Call.POST:
-                    return Method.POST;
+                    return HttpMethod.Post;
                 case Call.PATCH:
-                    return Method.PATCH;
+                    return new HttpMethod("PATCH");
                 case Call.DELETE:
-                    return Method.DELETE;
+                    return HttpMethod.Delete;
                 case Call.PUT:
-                    return Method.PUT;
+                    return HttpMethod.Put;
                 default:
-                    return Method.GET;
+                    return HttpMethod.Get;
             }
         }
 
         internal void SetBaseUrl(string baseurl)
         {
-            Client.BaseUrl = new Uri(baseurl);
+            Client = new HttpClient();
+            Client.BaseAddress = new Uri(baseurl);
         }
 
-        internal void Print(IRestResponse resp)
+        internal void Print(HttpResponseMessage resp)
         {
             Console.WriteLine(resp.Content);
         }

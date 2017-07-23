@@ -23,7 +23,8 @@ namespace ApiLibs.Instapaper
 
         public InstapaperService(string clientId, string clientSecret, string token, string tokenSecret) :base("https://www.instapaper.com/api/1.1/")
         {
-            Client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);
+            //TODO fix
+            //Client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);
         }
 
         /// <summary>

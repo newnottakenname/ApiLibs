@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
+using System.Net.Http;
 
 namespace ApiLibs.Outlook
 {
@@ -125,8 +126,7 @@ namespace ApiLibs.Outlook
             public string RefreshToken { get; set; }
         }
 
-
-        internal override async Task<IRestResponse> HandleRequest(string url, Call call = Call.GET, List<Param> parameters = null, List<Param> headers = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        internal override async Task<string> HandleRequest(string url, Call call = Call.GET, List<Param> parameters = null, List<Param> headers = null, object content = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             try
             {
@@ -137,7 +137,6 @@ namespace ApiLibs.Outlook
                 await RefreshToken();
                 return await base.HandleRequest(url, call, parameters, headers, content);
             }
-
         }
 
         /// <summary>
