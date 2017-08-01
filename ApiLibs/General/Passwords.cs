@@ -17,8 +17,10 @@ namespace ApiLibs.General
         public string GitHub_client_secret { get; set; }
         public string GitHub_access_token { get; set; }
 
-        public string Instaper_ID { get; set; }
-        public string Instaper_secret { get; set; }
+        public string Instaper_Consumer_ID { get; set; }
+        public string Instaper_Consumer_Secret { get; set; }
+        public string Instaper_Access_Token { get; set; }
+        public string Instaper_Access_Token_Secret { get; set; }
 
         public string OutlookClientSecret { get; set; }
         public string OutlookClientID { get; set; }

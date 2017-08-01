@@ -85,7 +85,7 @@ namespace ApiLibs
             parameters = parameters ?? new List<Param>();
 
             
-
+            
             parameters.AddRange(_standardParameter);
             var encoded =
                 new FormUrlEncodedContent(
@@ -142,24 +142,24 @@ namespace ApiLibs
                 RequestException toThrow;
                 switch (resp.StatusCode)
                 {
-                        case HttpStatusCode.NotFound:
-                            toThrow = new PageNotFoundException(resp, null, resp.StatusCode, responseContent);
-                            break;
-                        case HttpStatusCode.Unauthorized:
-                            toThrow = new UnAuthorizedException(resp, null, resp.StatusCode, responseContent);
-                            break;
-                        case HttpStatusCode.BadRequest:
-                            toThrow = new BadRequestException(resp, null, resp.StatusCode, responseContent);
-                            break;
-                        default:
-                            toThrow = new RequestException(resp, null, resp.StatusCode, responseContent);
+                    case HttpStatusCode.NotFound:
+                        toThrow = new PageNotFoundException(resp, null, resp.StatusCode, responseContent);
+                        break;
+                    case HttpStatusCode.Unauthorized:
+                        toThrow = new UnAuthorizedException(resp, null, resp.StatusCode, responseContent);
+                        break;
+                    case HttpStatusCode.BadRequest:
+                        toThrow = new BadRequestException(resp, null, resp.StatusCode, responseContent);
+                        break;
+                    default:
+                        toThrow = new RequestException(resp, null, resp.StatusCode, responseContent);
                         break;
 
                 }
                 Console.WriteLine("--Exception Log---");
                 Console.WriteLine("URL:\n" +  resp.RequestMessage.RequestUri);
                 Console.WriteLine("Status Code:\n" + toThrow.StatusCode);
-                Console.WriteLine("Response Message:\n" + resp.Content);
+                Console.WriteLine("Response Message:\n" + toThrow.Content);
                 Console.WriteLine("Full StackTrace:\n" + toThrow.StackTrace);
                 Console.WriteLine("---END---\n");
                 throw toThrow;

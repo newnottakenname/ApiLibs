@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
-using RestSharp;
-using RestSharp.Authenticators;
-using RestSharp.Authenticators.OAuth;
-using RestSharp.Authenticators.OAuth.Extensions;
+using ApiLibs;
+using ApiLibs.General;
+using ApiLibs.Instapaper;
+using AsyncOAuth;
 
 namespace ApiLibs.Instapaper
 {
@@ -23,8 +27,22 @@ namespace ApiLibs.Instapaper
 
         public InstapaperService(string clientId, string clientSecret, string token, string tokenSecret) :base("https://www.instapaper.com/api/1.1/")
         {
+            OAuthUtility.ComputeHash = (key, buffer) => { using (var hmac = new HMACSHA1(key)) { return hmac.ComputeHash(buffer); } };
+
+            Client = OAuthUtility.CreateOAuthClient(clientId, clientSecret, new AccessToken(token, tokenSecret));
+            Client.BaseAddress = new Uri("https://www.instapaper.com/api/1.1/");
+
             //TODO fix
             //Client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);
+
+            var headerFormat = "Basic {0}";
+
+            var authHeader = string.Format(headerFormat,
+                System.Convert.ToBase64String(Encoding.Unicode.GetBytes(Uri.EscapeDataString(clientId) + ":" +
+                                                                 Uri.EscapeDataString((clientSecret)))
+                ));
+
+            //AddStandardHeader("Authorization", "OAuth oauth_token=" + token + ", oauth_token_secret=" + tokenSecret);
         }
 
         /// <summary>
@@ -34,8 +52,39 @@ namespace ApiLibs.Instapaper
         /// <param name="password">password of the user</param>
         /// <param name="clientId">the id of your application</param>
         /// <param name="clientSecret">secret of your application</param>
-        public void Connect(string username, string password, string clientId, string clientSecret)
+        public async Task Connect(string username, string password, string clientId, string clientSecret)
         {
+
+            // create authorizer
+            var authorizer = new OAuthAuthorizer(clientId, clientSecret);
+
+            // get request token
+            var tokenResponse = await authorizer.GetRequestToken("https://api.twitter.com/oauth/request_token");
+            var requestToken = tokenResponse.Token;
+
+            var pinCode = password;
+
+            // get access token
+            var accessTokenResponse = await authorizer.GetAccessToken("https://api.twitter.com/oauth/access_token", requestToken, pinCode);
+
+            // save access token.
+            var accessToken = accessTokenResponse.Token;
+            Console.WriteLine("Key:" + accessToken.Key);
+            Console.WriteLine("Secret:" + accessToken.Secret);
+
+            //return accessToken;
+        }
+        /*string res = XAuth.GetAccessToken("https://www.instapaper.com/api/1/oauth/access_token", username,
+                password, clientId, clientSecret);
+
+            SetBaseUrl("https://www.instapaper.com/");
+            string s = await HandleRequest("/api/1/oauth/access_token", Call.POST, XAuth.GenerateParams(username, password, clientId).FindAll(p => p.Name.StartsWith("x_auth")), headers: new List<Param>
+            {
+                new Param("Authorization", res)
+            });
+
+            /*string s = "";
+
             var client = new RestClient("https://www.instapaper.com/api/1/")
             {
                 Authenticator = OAuth1Authenticator.ForRequestToken(clientId, clientSecret)
@@ -49,8 +98,8 @@ namespace ApiLibs.Instapaper
             string tokenSecret = respParameters[0].Replace("oauth_token_secret=", "");
             string token = respParameters[1].Replace("oauth_token=", "");
 
-            client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);
-        }
+            client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);*/
+        //}
 
         /// <summary>
         /// Lists the user's unread bookmarks, and can also synchronize reading positions.
