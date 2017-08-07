@@ -24,7 +24,7 @@ namespace ApiLibs.Spotify
             return (await MakeRequest<RelatedArtistResult>("artists?ids=" + ids.Aggregate((i,j) => i + "," + j), parameters: new List<Param>
             {
                 new Param("country", info.TwoLetterISORegionName),
-                new OParam("types", types?.ConvertAll<string>(i => i.ToString().ToLower()).Aggregate((i, j) => i + "," + j)),
+                new OParam("types", types?.Select(i => i.ToString().ToLower()).Aggregate((i, j) => i + "," + j)),
                 new OParam("limit", limit),
                 new OParam("offset", offset)
             })).artists;

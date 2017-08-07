@@ -176,8 +176,8 @@ namespace ApiLibs.Telegram
         public static T Convert<T>(ConvertableMessage message) where T:new()
         {
             T t = new T();
-            PropertyInfo[] propertyInfos = typeof(ConvertableMessage).GetProperties();
-            var toSetProperties = typeof(T).GetProperties();
+            IEnumerable<PropertyInfo> propertyInfos = typeof(ConvertableMessage).GetRuntimeProperties();
+            var toSetProperties = typeof(T).GetRuntimeProperties();
             foreach (PropertyInfo toSet in toSetProperties)
             {
                 foreach (PropertyInfo info in propertyInfos)

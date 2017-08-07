@@ -274,7 +274,7 @@ namespace ApiLibs.GitHub
 
         public ModifyIssue ConvertToRequest()
         {
-            return new ModifyIssue { title = title, body = body, assignee = assignee?.login, milestone = milestone?.number, labels = labels.ToList().ConvertAll((Label input) => input.name) };
+            return new ModifyIssue { title = title, body = body, assignee = assignee?.login, milestone = milestone?.number, labels = labels.ToList().Select(input => input.name).ToList() };
         }
     }
 

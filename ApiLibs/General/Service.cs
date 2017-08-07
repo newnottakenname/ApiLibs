@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using ApiLibs.General;
@@ -89,7 +90,7 @@ namespace ApiLibs
             parameters.AddRange(_standardParameter);
             var encoded =
                 new FormUrlEncodedContent(
-                    parameters.FindAll(i => !(i is OParam) || i.Value != null).ConvertAll(i => new KeyValuePair<string, string>(i.Name, i.Value)));
+                    parameters.FindAll(i => !(i is OParam) || i.Value != null).Select(i => new KeyValuePair<string, string>(i.Name, i.Value)));
 
             HttpRequestMessage request = null;
 

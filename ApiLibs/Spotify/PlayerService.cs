@@ -81,7 +81,7 @@ namespace ApiLibs.Spotify
         /// <returns></returns>
         public async Task Play(List<Track> tracks, Device device)
         {
-            await Play(tracks.ConvertAll(i => i.id), device?.id);
+            await Play(tracks.Select(i => i.id), device?.id);
         }
 
         /// <summary>
@@ -90,11 +90,11 @@ namespace ApiLibs.Spotify
         /// <param name="trackIds">The ids of the tracks you want to play</param>
         /// <param name="deviceId">on which device you want to play it</param>
         /// <returns></returns>
-        public async Task Play(List<string> trackIds, string deviceId = null)
+        public async Task Play(IEnumerable<string> trackIds, string deviceId = null)
         {
             Dictionary<string, string[]> kvp = new Dictionary<string, string[]>
             {
-                {"uris", trackIds.ConvertAll<string>(i => "spotify:track:" + i).ToArray()}
+                {"uris", trackIds.Select(i => "spotify:track:" + i).ToArray()}
             };
             deviceId = deviceId == null ? "" : "?device_id = " + deviceId;
             await Service.HandleRequest("me/player/play" + deviceId, Call.PUT, new List<Param>

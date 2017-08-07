@@ -20,13 +20,13 @@ namespace ApiLibs.General
 
             service = inputService;
 
-            foreach (var item in GetType().GetProperties())
+            foreach (var item in GetType().GetRuntimeProperties())
             {
                 if (item.GetValue(this) == null)
                 {
                     continue;
                 }
-                if (item.GetMethod.ReturnType.BaseType == typeof(ObjectSearcher))
+                if (item.GetMethod.ReturnType.GetGenericTypeDefinition() == typeof(ObjectSearcher))
                 {
                     ObjectSearcher objectSearcher = item.GetValue(this) as ObjectSearcher;
                     objectSearcher.Search(inputService);
@@ -37,7 +37,7 @@ namespace ApiLibs.General
                     Array a = (Array) item.GetValue(this);
                     foreach (object o in a)
                     {
-                        if (o.GetType().BaseType == typeof(ObjectSearcher))
+                        if (o.GetType().GetElementType() == typeof(ObjectSearcher))
                         {
                             (o as ObjectSearcher)?.Search(inputService);
                         }

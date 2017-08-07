@@ -1,11 +1,7 @@
 ﻿﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace ApiLibs.General
 {
@@ -13,8 +9,8 @@ namespace ApiLibs.General
     {
         public readonly string DirectoryPath;
 
-        public static readonly string ApplicationPath =
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar;
+        public static readonly string ApplicationPath = Environment.GetEnvironmentVariable(
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "LocalAppData" : "Home");
 
         public Memory(string baseUrl)
         {
@@ -54,9 +50,9 @@ namespace ApiLibs.General
             using (StreamReader reader = new StreamReader(stream))
             {
                 text = reader.ReadToEnd();
-                reader.Close();
+                reader.Dispose();
             }
-            stream.Close();
+            stream.Dispose();
             return text;
         }
 

@@ -117,8 +117,8 @@ namespace ApiLibs.Reddit
         public static T Convert<T>(Content message) where T : new()
         {
             T t = new T();
-            PropertyInfo[] propertyInfos = typeof(Content).GetProperties();
-            var toSetProperties = typeof(T).GetProperties();
+            IEnumerable<PropertyInfo> propertyInfos = typeof(Content).GetRuntimeProperties();
+            var toSetProperties = typeof(T).GetRuntimeProperties();
             foreach (PropertyInfo toSet in toSetProperties)
             {
                 foreach (PropertyInfo info in propertyInfos)

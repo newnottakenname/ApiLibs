@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using ApiLibs;
 using ApiLibs.General;
 using ApiLibs.Instapaper;
-using AsyncOAuth;
 
 namespace ApiLibs.Instapaper
 {
@@ -25,24 +24,14 @@ namespace ApiLibs.Instapaper
         /// </summary>
         public InstapaperService() : base("https://www.instapaper.com/api/1/") { }
 
-        public InstapaperService(string clientId, string clientSecret, string token, string tokenSecret) :base("https://www.instapaper.com/api/1.1/")
+        public InstapaperService(string clientId, string clientSecret, string token, string tokenSecret) : base("https://www.instapaper.com/api/1.1/")
         {
-            OAuthUtility.ComputeHash = (key, buffer) => { using (var hmac = new HMACSHA1(key)) { return hmac.ComputeHash(buffer); } };
-
-            Client = OAuthUtility.CreateOAuthClient(clientId, clientSecret, new AccessToken(token, tokenSecret));
-            Client.BaseAddress = new Uri("https://www.instapaper.com/api/1.1/");
-
-            //TODO fix
-            //Client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);
-
-            var headerFormat = "Basic {0}";
-
-            var authHeader = string.Format(headerFormat,
-                System.Convert.ToBase64String(Encoding.Unicode.GetBytes(Uri.EscapeDataString(clientId) + ":" +
-                                                                 Uri.EscapeDataString((clientSecret)))
-                ));
-
-            //AddStandardHeader("Authorization", "OAuth oauth_token=" + token + ", oauth_token_secret=" + tokenSecret);
+            OAuth.OAuthMessageHandler _handler = new OAuth.OAuthMessageHandler(
+                clientId,
+                clientSecret,
+                token,
+                tokenSecret);
+            Client = new HttpClient(_handler);
         }
 
         /// <summary>
@@ -52,27 +41,20 @@ namespace ApiLibs.Instapaper
         /// <param name="password">password of the user</param>
         /// <param name="clientId">the id of your application</param>
         /// <param name="clientSecret">secret of your application</param>
-        public async Task Connect(string username, string password, string clientId, string clientSecret)
+        public async Task<string> Connect(string username, string password, string clientId, string clientSecret)
         {
+            var authorizer = new OAuth.OAuthAuthenticator(clientId, clientSecret);
 
             // create authorizer
-            var authorizer = new OAuthAuthorizer(clientId, clientSecret);
 
             // get request token
-            var tokenResponse = await authorizer.GetRequestToken("https://api.twitter.com/oauth/request_token");
-            var requestToken = tokenResponse.Token;
+            var requestToken = authorizer.CreateGetRequestTokenAddress("https://api.twitter.com/oauth/request_token", "POST", "");
 
-            var pinCode = password;
 
             // get access token
-            var accessTokenResponse = await authorizer.GetAccessToken("https://api.twitter.com/oauth/access_token", requestToken, pinCode);
+            var accessToken = authorizer.CreateGetAccessTokenAddress("https://api.twitter.com/oauth/access_token", "POST", clientSecret, requestToken, password);
 
-            // save access token.
-            var accessToken = accessTokenResponse.Token;
-            Console.WriteLine("Key:" + accessToken.Key);
-            Console.WriteLine("Secret:" + accessToken.Secret);
-
-            //return accessToken;
+            return accessToken;
         }
         /*string res = XAuth.GetAccessToken("https://www.instapaper.com/api/1/oauth/access_token", username,
                 password, clientId, clientSecret);
