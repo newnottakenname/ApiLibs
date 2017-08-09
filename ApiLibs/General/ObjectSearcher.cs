@@ -26,7 +26,7 @@ namespace ApiLibs.General
                 {
                     continue;
                 }
-                if (item.GetMethod.ReturnType.GetGenericTypeDefinition() == typeof(ObjectSearcher))
+                if (item.GetMethod.ReturnType.GetTypeInfo().BaseType == typeof(ObjectSearcher))
                 {
                     ObjectSearcher objectSearcher = item.GetValue(this) as ObjectSearcher;
                     objectSearcher.Search(inputService);

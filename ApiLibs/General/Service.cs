@@ -13,12 +13,14 @@ namespace ApiLibs
     public abstract class Service
     {
         internal HttpClient Client;
+        internal readonly string baseAddress;
         private readonly List<Param> _standardParameter = new List<Param>();
         private readonly List<Param> _standardHeader = new List<Param>();
 
-        public Service(string hostUrl)
+        public Service(string baseAddress)
         {
-            Client = new HttpClient { BaseAddress = new Uri(hostUrl) };
+            this.baseAddress = baseAddress;
+            Client = new HttpClient();
         }
 
         internal void AddStandardParameter(Param p)
@@ -84,7 +86,7 @@ namespace ApiLibs
         {
             headers = headers ?? new List<Param>();
             parameters = parameters ?? new List<Param>();
-
+            string full_url = baseAddress + url;
             
             
             parameters.AddRange(_standardParameter);
@@ -96,11 +98,11 @@ namespace ApiLibs
 
             if (call == Call.POST)
             {
-                request = new HttpRequestMessage(Convert(call), url) {Content = encoded};
+                request = new HttpRequestMessage(Convert(call), full_url) {Content = encoded};
             }
             else
             {
-                request = new HttpRequestMessage(Convert(call), url + "?" + encoded.ReadAsStringAsync().Result);
+                request = new HttpRequestMessage(Convert(call), full_url + "?" + encoded.ReadAsStringAsync().Result);
             }
 
             if (content != null)

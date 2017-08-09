@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiLibsTest.Spotify
 {
@@ -11,7 +11,7 @@ namespace ApiLibsTest.Spotify
         private AlbumService albumService;
         private SpotifyService spotify;
 
-        [OneTimeSetUp]
+        [TestInitialize]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -19,23 +19,23 @@ namespace ApiLibsTest.Spotify
             albumService = spotify.AlbumService;
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetAlbumTest()
         {
-            Assert.NotNull(await albumService.GetAlbum("1qnHtqA3ZLLxFnUid3VseY"));
+            Assert.IsNotNull(await albumService.GetAlbum("1qnHtqA3ZLLxFnUid3VseY"));
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetNewReleasesTest()
         {
-            Assert.NotNull(await albumService.GetNewReleases());
+            Assert.IsNotNull(await albumService.GetNewReleases());
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetTracksTest()
         {
             Album alb = await albumService.GetAlbum("1qnHtqA3ZLLxFnUid3VseY");
-            Assert.NotNull(await albumService.GetTracks(alb));
+            Assert.IsNotNull(await albumService.GetTracks(alb));
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using ApiLibs;
 using ApiLibs.General;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiLibsTest.General
 {
-    class ObjectSearcherTest
+    [TestClass]
+    public class ObjectSearcherTest
     {
         private A a;
         private B b;
@@ -23,20 +24,20 @@ namespace ApiLibsTest.General
 
         private class A : ObjectSearcher
         {
-            public B b;
-            public C c;
+            public B b { get; set; }
+            public C c { get; set; }
         }
 
         private class B : ObjectSearcher
         {
-            public D d;
+            public D d { get; set; }
         }
 
         private class C { }
 
         private class D : ObjectSearcher { }
 
-        [SetUp]
+        [TestInitialize]
         public void SetUp()
         {
             d = new D();
@@ -48,22 +49,31 @@ namespace ApiLibsTest.General
             a.c = new C();
         }
 
-        [Test]
+        [TestMethod]
         public void FirstLevelTest()
         {
             Serv serv = new Serv("https://www.example.com");
-            b.Search(serv);
+            a.Search(serv);
+
+            Assert.IsTrue(a.service == serv);
+        }
+
+        [TestMethod]
+        public void SecondLevelTest()
+        {
+            Serv serv = new Serv("https://www.example.com");
+            a.Search(serv);
 
             Assert.IsTrue(b.service == serv);
         }
 
-        [Test]
-        public void SecondLevelTest()
+        [TestMethod]
+        public void ThirdLevelTest()
         {
             Serv serv = new Serv("https://www.example.com");
-            b.Search(serv);
+            a.Search(serv);
 
-            Assert.IsTrue(d.service == serv);
+            Assert.IsTrue(b.service == serv);
         }
     }
 }

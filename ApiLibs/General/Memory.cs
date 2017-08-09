@@ -10,7 +10,7 @@ namespace ApiLibs.General
         public readonly string DirectoryPath;
 
         public static readonly string ApplicationPath = Environment.GetEnvironmentVariable(
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "LocalAppData" : "Home");
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "AppData" : "Home") +  Path.DirectorySeparatorChar;
 
         public Memory(string baseUrl)
         {

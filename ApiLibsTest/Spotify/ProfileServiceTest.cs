@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiLibsTest.Spotify
 {
@@ -15,7 +15,7 @@ namespace ApiLibsTest.Spotify
         private ProfileService profileService;
         private SpotifyService spotify;
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -23,77 +23,77 @@ namespace ApiLibsTest.Spotify
             profileService = spotify.ProfileService;
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetMeTest()
         {
-            Assert.NotNull(await profileService.GetMe());
+            Assert.IsNotNull(await profileService.GetMe());
         }
 
-        [Test]
-        [Category("ModifyState")]
+        [TestMethod]
+        [TestCategory("ModifyState")]
         public async Task FollowArtistTest()
         {
             await profileService.Follow(UserType.Artist, "32WkQRZEVKSzVAAYqukAEA");
         }
 
-        [Test]
-        [Category("ModifyState")]
+        [TestMethod]
+        [TestCategory("ModifyState")]
         public async Task UnfollowArtistTest()
         {
             await profileService.Unfollow(UserType.Artist, "32WkQRZEVKSzVAAYqukAEA");
         }
 
-        [Test]
-        [Category("ModifyState")]
+        [TestMethod]
+        [TestCategory("ModifyState")]
         public async Task FollowUserTest()
         {
             await profileService.Follow(UserType.User, "ohwondermusic");
         }
 
-        [Test]
-        [Category("ModifyState")]
+        [TestMethod]
+        [TestCategory("ModifyState")]
         public async Task UnfollowUserTest()
         {
             await profileService.Unfollow(UserType.User, "ohwondermusic");
         }
 
-        [Test]
-        [Category("ModifyState")]
+        [TestMethod]
+        [TestCategory("ModifyState")]
         public async Task CheckIfFollowingTest()
         {
             await profileService.CheckIfFollowing(UserType.User, new List<string> { "ohwondermusic" });
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetFollowingArtistsTest()
         {
-            Assert.NotNull(await profileService.GetFollowingArtists());
+            Assert.IsNotNull(await profileService.GetFollowingArtists());
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetTopArtistsTest()
         {
-            Assert.NotNull(await profileService.GetTopArtists());
+            Assert.IsNotNull(await profileService.GetTopArtists());
         }
 
         //Tracks
 
-        [Test]
+        [TestMethod]
         public async Task GetTopTracksTest()
         {
-            Assert.NotNull(await profileService.GetTopTracks());
+            Assert.IsNotNull(await profileService.GetTopTracks());
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetRecentlyPlayedTest()
         {
-            Assert.NotNull(await profileService.GetRecentlyPlayed());
+            Assert.IsNotNull(await profileService.GetRecentlyPlayed());
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetSavedTest()
         {
-            Assert.NotNull(await profileService.GetSavedTracks());
+            Assert.IsNotNull(await profileService.GetSavedTracks());
         }
     }
 }

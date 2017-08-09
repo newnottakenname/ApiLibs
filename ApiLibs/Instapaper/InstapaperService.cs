@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using ApiLibs;
 using ApiLibs.General;
 using ApiLibs.Instapaper;
+using OAuth;
 
 namespace ApiLibs.Instapaper
 {
@@ -17,6 +19,8 @@ namespace ApiLibs.Instapaper
     public class InstapaperService : Service
     {
         private string AcessToken { get; set; }
+        private OAuthRequest client;
+
 
         /// <summary>
         /// Constructor to be called when you don't have a secret
@@ -26,12 +30,7 @@ namespace ApiLibs.Instapaper
 
         public InstapaperService(string clientId, string clientSecret, string token, string tokenSecret) : base("https://www.instapaper.com/api/1.1/")
         {
-            OAuth.OAuthMessageHandler _handler = new OAuth.OAuthMessageHandler(
-                clientId,
-                clientSecret,
-                token,
-                tokenSecret);
-            Client = new HttpClient(_handler);
+            client = OAuthRequest.ForProtectedResource("GET", clientId, clientSecret, token, tokenSecret);
         }
 
         /// <summary>
@@ -82,6 +81,17 @@ namespace ApiLibs.Instapaper
 
             client.Authenticator = OAuth1Authenticator.ForAccessToken(clientId, clientSecret, token, tokenSecret);*/
         //}
+
+        internal override Task<string> HandleRequest(string url, Call call = Call.GET, List<Param> parameters = null, List<Param> headers = null, object content = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            client.RequestUrl = baseAddress + url;
+            client.Method = call.ToString();
+            headers = headers ?? new List<Param>();
+            headers.Add(new Param("Authorization", client.GetAuthorizationHeader()));
+            headers.Add(new Param("Accept", "application/json, application/xml, text/json, text/x-json, text/javascript, text/xml"));
+            return base.HandleRequest(url, call, parameters, headers, content, statusCode);
+        }
 
         /// <summary>
         /// Lists the user's unread bookmarks, and can also synchronize reading positions.

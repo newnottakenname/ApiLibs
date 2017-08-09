@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiLibsTest.Spotify
 {
@@ -15,7 +15,7 @@ namespace ApiLibsTest.Spotify
         private ArtistService artistService;
         private SpotifyService spotify;
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -23,38 +23,38 @@ namespace ApiLibsTest.Spotify
             artistService = spotify.ArtistService;
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetArtistTest()
         {
-            Assert.NotNull(await artistService.GetArtist("6MDME20pz9RveH9rEXvrOM"));
+            Assert.IsNotNull(await artistService.GetArtist("6MDME20pz9RveH9rEXvrOM"));
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetArtistsTest()
         {
-            Assert.NotNull(await artistService.GetArtists(new List<string>
+            Assert.IsNotNull(await artistService.GetArtists(new List<string>
             {
                 "6MDME20pz9RveH9rEXvrOM",
                 "1Xylc3o4UrD53lo9CvFvVg"
             }, new System.Globalization.RegionInfo("nl")));
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetAlbumsFromArtistTest()
         {
-            Assert.NotNull(await artistService.GetAlbumFromArtist("5cIc3SBFuBLVxJz58W2tU9"));
+            Assert.IsNotNull(await artistService.GetAlbumFromArtist("5cIc3SBFuBLVxJz58W2tU9"));
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetTopTracksTest()
         {
-            Assert.NotNull(await artistService.GetTopTracks("5cIc3SBFuBLVxJz58W2tU9"));
+            Assert.IsNotNull(await artistService.GetTopTracks("5cIc3SBFuBLVxJz58W2tU9"));
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetRelatedArtistsTest()
         {
-            Assert.NotNull(await artistService.GetRelatedArtists("5cIc3SBFuBLVxJz58W2tU9"));
+            Assert.IsNotNull(await artistService.GetRelatedArtists("5cIc3SBFuBLVxJz58W2tU9"));
         }
 
 

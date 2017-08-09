@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiLibsTest.Spotify
 {
@@ -14,7 +14,7 @@ namespace ApiLibsTest.Spotify
     {
         private TrackService trackService;
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -22,19 +22,19 @@ namespace ApiLibsTest.Spotify
             trackService = spotify.TrackService;
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetTrackTest()
         {
             Assert.AreEqual("Never Gonna Give You Up", (await trackService.GetTrack("4uLU6hMCjMI75M1A2tKUQC")).name);
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetAudioAnalysisTest()
         {
             Assert.IsNotNull((await trackService.GetAudioAnalysis("4uLU6hMCjMI75M1A2tKUQC")).track);
         }
 
-        [Test]
+        [TestMethod]
         public async Task GetAudioFeaturesTest()
         {
             Assert.IsNotNull((await trackService.GetAudioFeatures("4uLU6hMCjMI75M1A2tKUQC")).acousticness);
