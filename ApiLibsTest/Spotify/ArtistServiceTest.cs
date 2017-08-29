@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ApiLibsTest.Spotify
 {
@@ -15,7 +15,7 @@ namespace ApiLibsTest.Spotify
         private ArtistService artistService;
         private SpotifyService spotify;
 
-        [ClassInitialize]
+        [SetUp]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -23,13 +23,13 @@ namespace ApiLibsTest.Spotify
             artistService = spotify.ArtistService;
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetArtistTest()
         {
             Assert.IsNotNull(await artistService.GetArtist("6MDME20pz9RveH9rEXvrOM"));
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetArtistsTest()
         {
             Assert.IsNotNull(await artistService.GetArtists(new List<string>
@@ -39,19 +39,19 @@ namespace ApiLibsTest.Spotify
             }, new System.Globalization.RegionInfo("nl")));
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetAlbumsFromArtistTest()
         {
             Assert.IsNotNull(await artistService.GetAlbumFromArtist("5cIc3SBFuBLVxJz58W2tU9"));
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetTopTracksTest()
         {
             Assert.IsNotNull(await artistService.GetTopTracks("5cIc3SBFuBLVxJz58W2tU9"));
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetRelatedArtistsTest()
         {
             Assert.IsNotNull(await artistService.GetRelatedArtists("5cIc3SBFuBLVxJz58W2tU9"));

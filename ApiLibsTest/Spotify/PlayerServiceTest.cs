@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiLibs.General;
 using ApiLibs.Spotify;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ApiLibsTest.Spotify
 {
@@ -15,7 +15,7 @@ namespace ApiLibsTest.Spotify
         private PlayerService playerService;
         private SpotifyService spotify;
 
-        [ClassInitialize]
+        [SetUp]
         public void SetUp()
         {
             Passwords passwords = Passwords.ReadPasswords(Memory.ApplicationPath + "Laurentia" + Path.DirectorySeparatorChar);
@@ -23,34 +23,34 @@ namespace ApiLibsTest.Spotify
             playerService = spotify.PlayerService;
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetDevicesTest()
         {
             Assert.IsNotNull(await playerService.GetDevices());
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetPlayerTest()
         {
             Assert.IsNotNull(await playerService.GetPlayer());
         }
 
-        [TestMethod]
+        [Test]
         public async Task GetCurrentlyPlayingTest()
         {
             Assert.IsNotNull(await playerService.GetCurrentPlaying());
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task TransferPlayback()
         {
             Device d = (await playerService.GetDevices()).devices[1];
             await playerService.TransferPlayback(d, false);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PlayTest()
         {
             Track t = await spotify.TrackService.GetTrack("4uLU6hMCjMI75M1A2tKUQC");
@@ -58,89 +58,89 @@ namespace ApiLibsTest.Spotify
             await playerService.Play(t, d);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PlayAlbumTest()
         {
             Album album = await spotify.AlbumService.GetAlbum("30SqWqmSU9ww0Btb1j4rpU");
             await playerService.Play(album);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PlayArtistTest()
         {
             await playerService.Play(new Artist { id= "5Pwc4xIPtQLFEnJriah9YJ" });
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PlayPlaylistTest()
         {
             await playerService.Play(new Playlist { id= "37i9dQZEVXcGwXcYmYDANi", owner = new Owner {  id= "onerepublicofficial" }  });
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PauseTest()
         {
             await playerService.Pause();
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task NextTest()
         {
             await playerService.Next();
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task NextWithIdTest()
         {
             var device = (await playerService.GetPlayer()).device;
             await playerService.Next(device.id);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PreviousTest()
         {
             await playerService.Previous();
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task PreviousWithIdTest()
         {
             var device = (await playerService.GetPlayer()).device;
             await playerService.Previous(device.id);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task SeekTest()
         {
             await playerService.Seek(0);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task SeekWithIdTest()
         {
             var device = (await playerService.GetPlayer()).device;
             await playerService.Seek(0, device.id);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task RepeatTest()
         {
             await playerService.Repeat(RepeatState.Off);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task RepeatAllTest()
         {
             await playerService.Repeat(RepeatState.Context);
@@ -148,29 +148,29 @@ namespace ApiLibsTest.Spotify
             await playerService.Repeat(RepeatState.Off);
         }
 
-        [TestMethod][TestCategory("ModifyState")]
+        [Test][Category("ModifyState")]
         public async Task RepeatWithIdTest()
         {
             var device = (await playerService.GetPlayer()).device;
             await playerService.Repeat(RepeatState.Context, device.id);
         }
 
-        [TestCategory("ModifyState")]
-        [TestMethod]
+        [Category("ModifyState")]
+        [Test]
         public async Task ShuffleTest()
         {
             await playerService.Shuffle(false);
         }
 
-        [TestCategory("ModifyState")]
-        [TestMethod]
+        [Category("ModifyState")]
+        [Test]
         public async Task StartShuffleTest()
         {
             await playerService.Shuffle(true);
         }
 
-        [TestMethod]
-        [TestCategory("ModifyState")]
+        [Test]
+        [Category("ModifyState")]
         public async Task StartShuffleWithIdTest()
         {
             var device = (await playerService.GetPlayer()).device;

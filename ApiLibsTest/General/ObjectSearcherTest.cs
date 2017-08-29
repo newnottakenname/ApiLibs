@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using ApiLibs;
 using ApiLibs.General;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ApiLibsTest.General
 {
-    [TestClass]
     public class ObjectSearcherTest
     {
         private A a;
@@ -37,7 +36,7 @@ namespace ApiLibsTest.General
 
         private class D : ObjectSearcher { }
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             d = new D();
@@ -49,7 +48,7 @@ namespace ApiLibsTest.General
             a.c = new C();
         }
 
-        [TestMethod]
+        [Test]
         public void FirstLevelTest()
         {
             Serv serv = new Serv("https://www.example.com");
@@ -58,7 +57,7 @@ namespace ApiLibsTest.General
             Assert.IsTrue(a.service == serv);
         }
 
-        [TestMethod]
+        [Test]
         public void SecondLevelTest()
         {
             Serv serv = new Serv("https://www.example.com");
@@ -67,7 +66,7 @@ namespace ApiLibsTest.General
             Assert.IsTrue(b.service == serv);
         }
 
-        [TestMethod]
+        [Test]
         public void ThirdLevelTest()
         {
             Serv serv = new Serv("https://www.example.com");
