@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ApiLibs.Telegram
 {
@@ -14,6 +14,7 @@ namespace ApiLibs.Telegram
         public delegate void MessageHandler(TgMessages m, EventArgs e);
 
         public Memory mem;
+
 
         public string Telegram_token;
 
